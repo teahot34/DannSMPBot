@@ -1,5 +1,3 @@
-# 📄 cogs/monitor.py
-
 from mcstatus import JavaServer
 from datetime import datetime
 import pytz
@@ -22,33 +20,30 @@ def sauvegarder_json(path, data):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
-def enregistrer_nouveaux_joueurs(joueurs_actuels):
+def enregistrer_connexions(joueurs_actuels):
     now = datetime.now(pytz.timezone("Europe/Paris"))
     date_str = now.strftime("%Y-%m-%d")
-    time_str = now.strftime("%H:%M:%S")
+    time_str = now.strftime("%H:%M")
 
     historique = charger_json(HISTORIQUE_PATH)
     last_seen = charger_json(LAST_SEEN_PATH)
 
-    if date_str not in historique:
-        historique[date_str] = {}
-
-    for joueur in joueurs_actuels:
-        if joueur not in last_seen:
-            historique[date_str].setdefault(joueur, []).append(f"{time_str}/...")
-        last_seen[joueur] = time_str
-
     joueurs_actuels_set = set(joueurs_actuels)
-    anciens_joueurs = set(last_seen.keys()) - joueurs_actuels_set
+    joueurs_précédents = set(last_seen.keys())
 
-    for joueur in anciens_joueurs:
-        heure_connexion = last_seen[joueur]
-        if joueur in historique[date_str]:
-            for i in range(len(historique[date_str][joueur]) - 1, -1, -1):
-                if historique[date_str][joueur][i].endswith("/..."):
-                    historique[date_str][joueur][i] = f"{heure_connexion}/{time_str}"
-                    break
-        del last_seen[joueur]
+    # Joueurs connectés maintenant mais pas avant => connexion
+    nouveaux = joueurs_actuels_set - joueurs_précédents
+    # Joueurs qui étaient connectés mais plus maintenant => déconnexion
+    partis = joueurs_précédents - joueurs_actuels_set
+
+    for joueur in nouveaux:
+        historique.setdefault(date_str, {}).setdefault(joueur, []).append(time_str)
+
+    for joueur in partis:
+        historique.setdefault(date_str, {}).setdefault(joueur, []).append(time_str)
+
+    # Mise à jour des joueurs actuellement en ligne
+    last_seen = {j: True for j in joueurs_actuels}
 
     sauvegarder_json(HISTORIQUE_PATH, historique)
     sauvegarder_json(LAST_SEEN_PATH, last_seen)
@@ -68,7 +63,7 @@ class MonitorCog(commands.Cog):
             status = await server.async_status()
             sample = status.players.sample or []
             joueurs = [p.name for p in sample]
-            enregistrer_nouveaux_joueurs(joueurs)
+            enregistrer_connexions(joueurs)
         except Exception as e:
             print(f"[Monitor] Erreur de ping : {e}")
 
