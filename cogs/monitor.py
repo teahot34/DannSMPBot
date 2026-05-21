@@ -6,7 +6,8 @@ import os
 from discord.ext import tasks, commands
 
 # ==================== CONFIGURATION DU SERVEUR ====================
-IP_SERVEUR = "dannstylesmp.mine.fun"  # Configuré avec ta vraie nouvelle IP !
+IP_SERVEUR = "91.197.6.140"
+PORT_SERVEUR = 23779
 # ==================================================================
 
 HISTORIQUE_PATH = "data/historique.json"
@@ -46,7 +47,6 @@ def enregistrer_joueurs(joueurs_actuels):
 
     # Enregistrer les NOUVELLES connexions
     for joueur in nouveaux:
-        # On ajoute la session "en cours" (ex: 14:30/)
         historique.setdefault(date_str, {}).setdefault(joueur, []).append(f"{time_str}/") 
         last_seen[joueur] = {
             "start": now.isoformat()
@@ -62,11 +62,9 @@ def enregistrer_joueurs(joueurs_actuels):
         start_date = start_dt.strftime("%Y-%m-%d")
         start_time = start_dt.strftime("%H:%M")
 
-        # Session complète (ex: 14:30/16:45)
         session_str = f"{start_time}/{time_str}"
         session_en_cours = f"{start_time}/"
 
-        # On cherche et on remplace la session "en cours" par la session complète
         sessions_du_jour = historique.setdefault(start_date, {}).setdefault(joueur, [])
         
         if session_en_cours in sessions_du_jour:
@@ -75,11 +73,9 @@ def enregistrer_joueurs(joueurs_actuels):
         else:
             sessions_du_jour.append(session_str)
 
-        # Si le joueur s'est connecté hier et a quitté aujourd'hui
         if start_date != date_str:
             historique.setdefault(date_str, {}).setdefault(joueur, []).append(f"00:00/{time_str}")
 
-        # Nettoyer
         del last_seen[joueur]
 
     sauvegarder_json(HISTORIQUE_PATH, historique)
@@ -97,16 +93,14 @@ class MonitorCog(commands.Cog):
     @tasks.loop(seconds=60)
     async def check_server(self):
         try:
-            # Utilisation de la méthode asynchrone robuste pour éviter les blocages de socket (getsockopt)
-            server = await JavaServer.async_lookup(IP_SERVEUR)
+            # Connexion directe et stable par IP + Port
+            server = JavaServer(IP_SERVEUR, PORT_SERVEUR)
             status = await server.async_status()
             
             sample = status.players.sample or []
             joueurs = [p.name for p in sample]
             enregistrer_joueurs(joueurs)
-        except Exception as e:
-            # Optionnel : décommente la ligne ci-dessous dans ton terminal si tu veux débugger en direct
-            # print(f"[Monitor Error] {e}")
+        except Exception:
             pass
 
     @check_server.before_loop
