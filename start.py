@@ -1,7 +1,7 @@
 import os
 import discord
 from discord.ext import commands
-from dotenv import load_model, load_dotenv
+from dotenv import load_dotenv
 
 # Chargement des variables d'environnement (.env)
 load_dotenv()
