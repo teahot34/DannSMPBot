@@ -43,7 +43,7 @@ class CommandOnlineCog(commands.Cog):
 
             embed = Embed(
                 title=f"📡 Statut de {NOM_SERVEUR}",
-                description=f"🟢 Le serveur répond ! (Joueurs : **{joueurs_connectes}**/**{joueurs_max}**)",
+                description=f"🟢 Voici les joueurs en ligne ! (Joueurs : **{joueurs_connectes}**/**{joueurs_max}**)",
                 color=0x57F287
             )
 
