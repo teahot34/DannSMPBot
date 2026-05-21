@@ -6,7 +6,7 @@ import os
 from discord.ext import tasks, commands
 
 # ==================== CONFIGURATION DU SERVEUR ====================
-IP_SERVEUR = "dann-smp.mon-ip.com"  # Mets la nouvelle IP de ton serveur ici !
+IP_SERVEUR = "dannstylesmp.mine.fun"  # Configuré avec ta vraie nouvelle IP !
 # ==================================================================
 
 HISTORIQUE_PATH = "data/historique.json"
@@ -97,15 +97,16 @@ class MonitorCog(commands.Cog):
     @tasks.loop(seconds=60)
     async def check_server(self):
         try:
-            # Recherche du serveur (syntaxe moderne mcstatus)
-            server = JavaServer.lookup(IP_SERVEUR)
-            status = await server.status()
+            # Utilisation de la méthode asynchrone robuste pour éviter les blocages de socket (getsockopt)
+            server = await JavaServer.async_lookup(IP_SERVEUR)
+            status = await server.async_status()
             
             sample = status.players.sample or []
             joueurs = [p.name for p in sample]
             enregistrer_joueurs(joueurs)
         except Exception as e:
-            # On commente l'erreur pour ne pas spammer la console si le serveur redémarre
+            # Optionnel : décommente la ligne ci-dessous dans ton terminal si tu veux débugger en direct
+            # print(f"[Monitor Error] {e}")
             pass
 
     @check_server.before_loop
