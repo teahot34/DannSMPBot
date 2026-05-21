@@ -3,18 +3,12 @@ from datetime import datetime
 import pytz
 import json
 import os
-<<<<<<< HEAD
 from discord.ext import tasks, commands
 
 # ==================== CONFIGURATION DU SERVEUR ====================
 IP_SERVEUR = "dann-smp.mon-ip.com"  # Mets la nouvelle IP de ton serveur ici !
 # ==================================================================
 
-=======
-import asyncio
-from discord.ext import tasks, commands
-
->>>>>>> 46f4bcfd25f9430433d14b94d835a8a2b80f10bc
 HISTORIQUE_PATH = "data/historique.json"
 LAST_SEEN_PATH = "data/last_seen.json"
 TIMEZONE = pytz.timezone("Europe/Paris")
@@ -24,14 +18,10 @@ def charger_json(path):
     if not os.path.exists(path):
         return {}
     with open(path, "r", encoding="utf-8") as f:
-<<<<<<< HEAD
         try:
             return json.load(f)
         except json.JSONDecodeError:
             return {}
-=======
-        return json.load(f)
->>>>>>> 46f4bcfd25f9430433d14b94d835a8a2b80f10bc
 
 
 def sauvegarder_json(path, data):
@@ -54,25 +44,15 @@ def enregistrer_joueurs(joueurs_actuels):
     nouveaux = joueurs_actuels_set - anciens_joueurs
     partis = anciens_joueurs - joueurs_actuels_set
 
-<<<<<<< HEAD
     # Enregistrer les NOUVELLES connexions
     for joueur in nouveaux:
         # On ajoute la session "en cours" (ex: 14:30/)
         historique.setdefault(date_str, {}).setdefault(joueur, []).append(f"{time_str}/") 
-=======
-    # Enregistrer les connexions
-    for joueur in nouveaux:
-        historique.setdefault(date_str, {}).setdefault(joueur, []).append(f"{time_str}/")  # début sans fin
->>>>>>> 46f4bcfd25f9430433d14b94d835a8a2b80f10bc
         last_seen[joueur] = {
             "start": now.isoformat()
         }
 
-<<<<<<< HEAD
     # Enregistrer les DÉCONNEXIONS
-=======
-    # Enregistrer les déconnexions
->>>>>>> 46f4bcfd25f9430433d14b94d835a8a2b80f10bc
     for joueur in partis:
         info = last_seen.get(joueur)
         if not info or "start" not in info:
@@ -82,7 +62,6 @@ def enregistrer_joueurs(joueurs_actuels):
         start_date = start_dt.strftime("%Y-%m-%d")
         start_time = start_dt.strftime("%H:%M")
 
-<<<<<<< HEAD
         # Session complète (ex: 14:30/16:45)
         session_str = f"{start_time}/{time_str}"
         session_en_cours = f"{start_time}/"
@@ -99,17 +78,6 @@ def enregistrer_joueurs(joueurs_actuels):
         # Si le joueur s'est connecté hier et a quitté aujourd'hui
         if start_date != date_str:
             historique.setdefault(date_str, {}).setdefault(joueur, []).append(f"00:00/{time_str}")
-=======
-        # Session complète
-        session_str = f"{start_time}/{time_str}"
-
-        # Ajouter à la date de début
-        historique.setdefault(start_date, {}).setdefault(joueur, []).append(session_str)
-
-        # Si on a changé de jour, ajouter aussi à aujourd'hui
-        if start_date != date_str:
-            historique.setdefault(date_str, {}).setdefault(joueur, []).append(session_str)
->>>>>>> 46f4bcfd25f9430433d14b94d835a8a2b80f10bc
 
         # Nettoyer
         del last_seen[joueur]
@@ -129,25 +97,16 @@ class MonitorCog(commands.Cog):
     @tasks.loop(seconds=60)
     async def check_server(self):
         try:
-<<<<<<< HEAD
             # Recherche du serveur (syntaxe moderne mcstatus)
             server = JavaServer.lookup(IP_SERVEUR)
             status = await server.status()
             
-=======
-            server = JavaServer.lookup("heldery.tomiix.fr")
-            status = await server.async_status()
->>>>>>> 46f4bcfd25f9430433d14b94d835a8a2b80f10bc
             sample = status.players.sample or []
             joueurs = [p.name for p in sample]
             enregistrer_joueurs(joueurs)
         except Exception as e:
-<<<<<<< HEAD
             # On commente l'erreur pour ne pas spammer la console si le serveur redémarre
             pass
-=======
-            print(f"[Monitor] Erreur de ping : {e}")
->>>>>>> 46f4bcfd25f9430433d14b94d835a8a2b80f10bc
 
     @check_server.before_loop
     async def before_loop(self):
@@ -155,8 +114,4 @@ class MonitorCog(commands.Cog):
 
 
 async def setup(bot):
-<<<<<<< HEAD
     await bot.add_cog(MonitorCog(bot))
-=======
-    await bot.add_cog(MonitorCog(bot))
->>>>>>> 46f4bcfd25f9430433d14b94d835a8a2b80f10bc
