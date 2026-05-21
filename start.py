@@ -1,79 +1,38 @@
-import discord
 import os
-from dotenv import load_dotenv
+import discord
 from discord.ext import commands
-<<<<<<< HEAD
+from dotenv import load_model, load_dotenv
 
-# On essaie d'importer keep_alive, si le fichier n'existe pas (hors Replit), on l'ignore
-try:
-    from keep_alive import keep_alive
-    HAS_KEEP_ALIVE = True
-except ImportError:
-    HAS_KEEP_ALIVE = False
-=======
-from keep_alive import keep_alive
->>>>>>> 46f4bcfd25f9430433d14b94d835a8a2b80f10bc
-
+# Chargement des variables d'environnement (.env)
 load_dotenv()
-token = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv("DISCORD_TOKEN") # ou "TOKEN" selon ce que tu as écrit dans ton .env
 
-class MonBot(commands.Bot):
-    async def setup_hook(self):
-<<<<<<< HEAD
-        # Chargement des extensions (tes fichiers dans le dossier cogs)
-        for extension in ['commandes_slash', 'online', 'history', 'monitor']:
-            try:
-                await self.load_extension(f'cogs.{extension}')
-                print(f"Extension {extension} chargée avec succès !")
-            except Exception as e:
-                print(f"Impossible de charger l'extension {extension} : {e}")
+# Configuration des intentions (Intents) de Discord
+intents = discord.Intents.default()
+intents.message_content = True  # Obligatoire pour lire les messages
 
-        # Synchronisation globale des commandes slash (visible sur tous tes serveurs)
-        await self.tree.sync()
-        print("Commandes slash synchronisées avec succès !")
-
-intents = discord.Intents.all()
-# On utilise un prefixe optionnel car tu fonctionnes principalement en commandes slash (/)
-bot = MonBot(command_prefix="!", intents=intents)
+# Création de l'instance du Bot
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"Connecté en tant que {bot.user.name} ({bot.user.id})")
-    print("Le bot est prêt et en ligne !")
-
-@bot.event
-async def on_message(message: discord.Message):
-    if message.author.bot:
-        return
-    # Petite réponse automatique sympa
-    if message.content.lower().startswith("bonjour") or message.content.lower().startswith("salut"):
-        await message.channel.send(f"Salut {message.author.mention} ! 👋")
-
-# Lance le keep_alive uniquement si le fichier est présent
-if HAS_KEEP_ALIVE:
-    keep_alive()
+    print(f"=== Bot connecté avec succès ===")
+    print(f"Nom : {bot.user.name}")
+    print(f"ID : {bot.user.id}")
+    print(f"================================")
+    
+    # Chargement automatique des extensions (cogs)
+    extensions = ["cogs.history", "cogs.monitor"]
+    for ext in extensions:
+        try:
+            await bot.load_extension(ext)
+            print(f"Extension '{ext}' chargée avec succès.")
+        except Exception as e:
+            print(f"Impossible de charger l'extension {ext} : {e}")
 
 # Lancement du bot
-=======
-        # Chargement des extensions
-        for extension in ['commandes_slash', 'online', 'history', 'monitor']:
-            await self.load_extension(f'cogs.{extension}')
-
-        # Synchronisation des commandes slash sur tous les guildes du bot (globale)
-        await self.tree.sync()
-
-
-intents = discord.Intents.all()
-bot = MonBot(command_prefix="!", intents=intents)
-
-@bot.event
-async def on_message(message: discord.Message):
-    if message.author.bot:
-        return
-    if message.content.lower().startswith("bonjour") or message.content.lower().startswith("salut"):
-        await message.channel.send("salut")
-
-
-keep_alive()
->>>>>>> 46f4bcfd25f9430433d14b94d835a8a2b80f10bc
-bot.run(token=token)
+if __name__ == "__main__":
+    if TOKEN:
+        bot.run(TOKEN)
+    else:
+        print("Erreur : Aucun token trouvé. Vérifie ton fichier .env ou tes variables d'environnement.")
