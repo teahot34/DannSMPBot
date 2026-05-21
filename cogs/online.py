@@ -22,20 +22,21 @@ class CommandOnlineCog(commands.Cog):
             
             # --- TEST 1 : Méthode standard (status) ---
             try:
-                status = await server.status()
+                status = await server.async_status()
                 joueurs_connectes = status.players.online
                 joueurs_max = status.players.max
                 joueurs_noms = [player.name for player in status.players.sample or []]
             except Exception:
                 # --- TEST 2 : Méthode Query (si le port standard est bloqué) ---
                 try:
-                    query = await server.query()
+                    query = await server.async_query()
                     joueurs_connectes = query.players.online
                     joueurs_max = query.players.max
                     joueurs_noms = query.players.names
                 except Exception:
-                    # --- TEST 3 : Ping léger (Donne l'info si ON/OFF) ---
-                    await server.ping()
+                    # --- TEST 3 : Ping léger asynchrone (Donne l'info si ON/OFF) ---
+                    # Correction : .async_ping() s'attend, contrairement à .ping() qui renvoie un float
+                    await server.async_ping()
                     joueurs_connectes = "?"
                     joueurs_max = "?"
                     joueurs_noms = []
