@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 # Chargement des variables d'environnement (.env)
 load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN") # ou "TOKEN" selon ce que tu as écrit dans ton .env
+TOKEN = os.getenv("DISCORD_TOKEN")
 
 # Configuration des intentions (Intents) de Discord
 intents = discord.Intents.default()
@@ -22,13 +22,26 @@ async def on_ready():
     print(f"================================")
     
     # Chargement automatique des extensions (cogs)
-    extensions = ["cogs.history", "cogs.monitor"]
+    extensions = [
+        "cogs.history", 
+        "cogs.monitor", 
+        "cogs.commandes_slash", 
+        "cogs.online"
+    ]
+    
     for ext in extensions:
         try:
             await bot.load_extension(ext)
             print(f"Extension '{ext}' chargée avec succès.")
         except Exception as e:
             print(f"Impossible de charger l'extension {ext} : {e}")
+
+    # Synchronisation globale des commandes slash avec l'API Discord
+    try:
+        synced = await bot.tree.sync()
+        print(f"Synchronisation réussie : {len(synced)} commandes slash synchronisées globalement.")
+    except Exception as e:
+        print(f"Erreur lors de la synchronisation des commandes : {e}")
 
 # Lancement du bot
 if __name__ == "__main__":
